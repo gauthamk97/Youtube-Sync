@@ -32,6 +32,11 @@ body {
     top: 0;
 }
 
+#playerContainer > button {
+    margin: 10px;
+    margin-top: 25px;
+}
+
 #chatContainer {
     border: 3px solid black;
     height: 100%;
@@ -97,4 +102,20 @@ body {
     #playerContainer {
         padding: 0px;
     }
+
+    /* BEGIN: Remove scrolling of chats for smaller screens */
+    #chatContainer {
+        height: initial;
+    }
+
+    #chatContainer > #chatHeadingContainer {
+        height: initial;
+    }
+
+    #chatContainer > #allChatsContainer {
+        height: initial;
+        overflow-y: initial;
+    }
+    /* END: Remove scrolling of chats for smaller screens */
+
 }
