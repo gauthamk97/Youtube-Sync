@@ -1,0 +1,100 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    padding: 8px;
+}
+
+.row {
+    margin: 0px;
+}
+
+#playerContainer {
+    text-align: center;
+}
+
+#playerContainer > #iframeContainer {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+}
+
+#playerContainer > #iframeContainer > #player {
+    border: 1px red solid;
+    margin-top: 10px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+#chatContainer {
+    border: 3px solid black;
+    height: 100%;
+    padding: 0px;
+}
+
+#chatContainer > #chatHeadingContainer {
+    padding: 10px 0px;
+    height: 8%;
+}
+
+#chatHeadingContainer > #chatHeading {
+    margin: 0px;
+    text-align: center;
+}
+
+#chatContainer > #allChatsContainer {
+    overflow-y: scroll;
+    height: 82%;
+    padding: 12px;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+#chatContainer > #allChatsContainer > .message {
+    margin-bottom: 7px;
+}
+
+#chatContainer > #allChatsContainer > .message > p {
+    margin: 0px;
+}
+
+#chatContainer > #sendMessageContainer {
+    height: 10%;
+    padding: 5px;
+}
+
+#chatContainer > #sendMessageContainer > #messageForm {
+    text-align: center;
+    margin: 0px;
+}
+
+#chatContainer > #sendMessageContainer > #messageForm > #messageInputTextBox {
+    height: 100%;
+    width: 75%;
+}
+
+#chatContainer > #sendMessageContainer > #messageForm > #messageInputSubmitButton {
+    height: 100%;
+    width: 23%;
+    padding: 0px;
+}
+
+@media (max-width: 992px) {
+    .container {
+        margin-bottom: 20px;
+    }
+
+    body {
+        overflow: auto;
+    }
+
+    #playerContainer {
+        padding: 0px;
+    }
+}
