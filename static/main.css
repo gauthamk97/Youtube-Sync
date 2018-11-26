@@ -1,0 +1,32 @@
+html, body {
+    height: 100%;
+}
+
+#wrapper {
+    height: 100%;
+    width: 100%;
+    display: table;
+}
+
+#mainContainer {
+    display: table-cell;
+    height: 100%;
+    vertical-align: middle;
+    text-align: center
+}
+
+#mainContainer > #mainHeading {
+    margin-top: 20px;
+    padding: 0px 10px;
+}
+
+#mainContainer > #youtubeImage {
+    display: block;
+    margin: auto;
+    margin-top: 20px;
+}
+
+#mainContainer > button {
+    margin: 10px;
+    margin-top: 20px;
+}
