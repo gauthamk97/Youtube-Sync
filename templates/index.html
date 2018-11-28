@@ -15,13 +15,20 @@
         <div id="mainContainer">
             <h1 id="mainHeading">Welcome to Youtube Sync</h1>
             <img id="youtubeImage" src="/static/youtubeLogo.png" />
-            <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newSessionModal">Create New Session</button>
-            <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#joinSessionModal">Join Existing Session</button>
+            <div id="enterUsernameDiv">
+                <input id="usernameInputTextBox" type="text" placeholder="Enter a Username"> <br />
+                <button type="button" class="btn btn-primary btn-lg" onclick="createSession($('#usernameInputTextBox')[0].value)">Proceed</button>
+            </div>
+            <div id="chooseOptionDiv">
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newRoomModal">Create New Room</button>
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#joinRoomModal">Join Existing Room</button>
+            </div>
+            
         </div>
     </div>
 
-    <!-- Bootstrap Modal for New Session  -->
-    <div id="newSessionModal" class="modal fade" tabindex="-1" role="dialog">
+    <!-- Bootstrap Modal for New Room  -->
+    <div id="newRoomModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -31,19 +38,18 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input id="NSvideoIDInputTextBox" style="width: 100%" type="text" name="message" placeholder="Video ID">
-                    <h6>Error</h6>
+                    <input id="NSvideoIDInputTextBox" class="roomInput" type="text" name="message" placeholder="Video ID">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="createSession(document.getElementById('NSvideoIDInputTextBox').value)">Create Session</button>
+                    <button type="button" class="btn btn-primary" onclick="createRoom($('#NSvideoIDInputTextBox')[0].value)">Create Room</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap Modal for Joining Session  -->
-    <div id="joinSessionModal" class="modal fade" tabindex="-1" role="dialog">
+    <!-- Bootstrap Modal for Joining Room  -->
+    <div id="joinRoomModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -53,10 +59,10 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input id="JSroomIDInputTextBox" style="width: 100%" type="text" name="message" placeholder="Room ID">
+                    <input id="JSroomIDInputTextBox" class="roomInput" type="text" name="message" placeholder="Room ID">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="joinSession(document.getElementById('JSroomIDInputTextBox').value)">Join Session</button>
+                    <button type="button" class="btn btn-primary" onclick="joinRoom($('#JSroomIDInputTextBox')[0].value)">Join Room</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -64,43 +70,70 @@
     </div>
 
     <script>
-        function createSession(videoID) {
-            if (videoID=="") {
-                alert('Enter Valid Video ID');
+        function createSession(username) {
+            if (username=="") {
+                alert('Username cannot be left blank');
                 return;
             }
 
             var myRequest = new XMLHttpRequest();
-            myRequest.open('GET', document.URL+'room/add?videoID='+videoID)
+            myRequest.open('GET', '/login?username='+username);
             myRequest.onreadystatechange = function() {
                 if (myRequest.readyState == 4) {
-                    response = JSON.parse(myRequest.responseText);
-                    if (response.status == 200) {
-                        window.location = document.URL+"watch/"+response.roomID
+                    if (myRequest.status == 200) {
+                        $('#enterUsernameDiv').fadeOut(400, function() {
+                            $('#enterUsernameDiv').hide();
+                            $('#chooseOptionDiv').fadeIn(400);
+                        })
                     } else {
-                        alert('Failure')
+                        alert('There was a server error')
                     }
                 }
             }
             myRequest.send();
         }
 
-        function joinSession(roomID) {
+        function createRoom(videoID) {
+            if (videoID=="") {
+                alert("VideoID cannot be left blank");
+                return;
+            }
+
+            var myRequest = new XMLHttpRequest();
+            myRequest.open('GET', '/room/add?videoID='+videoID);
+            myRequest.onreadystatechange = function() {
+                if (myRequest.readyState == 4) {
+                    if (myRequest.status == 200) {
+                        response = JSON.parse(myRequest.responseText);
+                        window.location = "/watch/"+response.roomID;
+                    } else {
+                        alert('New Room creation failed');
+                    }
+                }
+            }
+            myRequest.send();
+        }
+
+        function joinRoom(roomID) {
             if (roomID=="") {
                 alert('Enter Valid Room ID');
                 return;
             }
 
             var myRequest = new XMLHttpRequest();
-            myRequest.open('GET', document.URL+'room/check?roomID='+roomID)
+            myRequest.open('GET', '/room/check?roomID='+roomID);
             myRequest.onreadystatechange = function() {
                 if (myRequest.readyState == 4) {
-                    console.log(myRequest.responseText);
                     response = JSON.parse(myRequest.responseText);
-                    if (response.status == 200) {
-                        window.location = document.URL+"watch/"+roomID
+                    if (myRequest.status == 200) {
+                        // Redirect to watch page
+                        window.location = "/watch/"+roomID;
+                    } else if (response.response == "Room doesn't exist") {
+                        alert("Room doesn't exist");
+                    } else if (myRequest.status == 500) {
+                        alert("Internal Server Error");
                     } else {
-                        alert("Room doesn't exist")
+                        alert("An unknown error occurred");
                     }
                 }
             }
@@ -108,7 +141,7 @@
         }
     </script>
     <!-- Bootstrap Requirements -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>

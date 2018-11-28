@@ -26,7 +26,24 @@ html, body {
     margin-top: 20px;
 }
 
-#mainContainer > button {
+#mainContainer > #enterUsernameDiv > input {
+    font-size: 21px;
+}
+
+#mainContainer > #enterUsernameDiv > input, button {
+    margin-top: 10px;
+}
+
+#mainContainer > #chooseOptionDiv {
+    display: none; 
+}
+
+#mainContainer > #chooseOptionDiv > button {
     margin: 10px;
     margin-top: 20px;
+}
+
+.roomInput {
+    width: 100%;
+    margin-bottom: 5px;
 }
