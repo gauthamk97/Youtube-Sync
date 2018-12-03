@@ -115,7 +115,7 @@ def watchPage(roomID):
     cursor.execute("SELECT videoID FROM open_rooms WHERE roomID={}".format(roomID))
     data = cursor.fetchone()
     videoID = data[0]
-    return render_template('watch.html', videoID = videoID, roomID = roomID)
+    return render_template('watch.html', videoID = videoID, roomID = roomID, username = session['username'])
 
 @socketIO.on('connect')
 def connection():
@@ -125,15 +125,30 @@ def connection():
 def joinRoom(data):
     print('Received for join : '+ str(data))
     room = data['room']
+    newUser = session['username']
     join_room(room)
-    socketIO.emit('memberChange', '{} just entered the room'.format(session['username']), room=room)
+    socketIO.emit('memberAdd', newUser, room=room)
 
 @socketIO.on('leave')
 def leaveRoom(data):
     print('Received for leave : '+ str(data))
     room = data['room']
+    leavingUser = session['username']
     leave_room(room)
-    socketIO.emit('memberChange', '{} just left the room from leaveRoom'.format(session['username']), room = room)
+    socketIO.emit('memberLeave', leavingUser, room = room)
+
+@socketIO.on('message')
+def receivedMessage(data):
+    print("Received message : {}".format(data))
+    username = session['username']
+    msg = data['message']
+    room = data['room']
+    socketIO.emit(
+        'message',
+        {'username': username,'message': msg},
+        room = room,
+        include_self = False
+    )
 
 # Still to implementing closing of rooms
 # Should also remove entry from database when a room is closed
@@ -144,7 +159,8 @@ def closeRoom(room):
 def test_disconnect():
     for room in rooms(request.sid):
         leave_room(room, sid=request.sid)
-        socketIO.emit('memberChange', '{} just left the room'.format(session['username']), room = room)
+        leavingUser = session['username']
+        socketIO.emit('memberLeave', leavingUser, room = room)
     print('Client Disconnected : ', request.sid)
 
 # This seems to be pointless, it works without this anyways

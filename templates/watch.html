@@ -30,54 +30,10 @@
                     <h2 id="chatHeading">Chat</h2>
                 </div>
                 <div id="allChatsContainer">
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
-                    <div class="message">
-                        <p>
-                            <strong>Name</strong> : Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Proin consequat, nisl iaculis pulvinar gravida, nisl dui vulputate justo, eget 
-                            ullamcorper nisi dui vel lorem. Vivamus id enim lectus.
-                        </p>
-                    </div>
                 </div>
                 <div id="sendMessageContainer">
-                    <form id="messageForm" action="">
-                        <input id="messageInputTextBox" type="text" name="message" placeholder="Message">
-                        <input id="messageInputSubmitButton" type="submit" value="Send">
-                    </form>
+                    <input id="messageInputTextBox" type="text" name="message" placeholder="Message">
+                    <button id="messageInputSubmitButton" onclick="sendMessage($('#messageInputTextBox')[0].value)">Send</button>
                 </div>
             </div>
         </div>
@@ -104,8 +60,8 @@
         </div>
     </div>
 
+    <!-- Youtube player related scripts -->
     <script>
-        
         // This code loads the IFrame Player API code asynchronously.
         var tag = document.createElement('script');
 
@@ -138,13 +94,8 @@
         function onPlayerStateChange(event) {
             console.log('player state change');
         }
-
-        // Called when logout button is clicked
-        function logout() {
-            window.location = "/logout"
-        }
-
     </script>
+
     <!-- Bootstrap Requirements -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
@@ -159,9 +110,78 @@
             socket.emit('join', {room: '{{roomID}}'});
         });
 
-        socket.on('memberChange', function(data) {
-            console.log(data)
+        socket.on('memberAdd', function(newMember) {
+            addNewMemberDetails(newMember);
         })
+
+        socket.on('memberLeave', function(leavingMember) {
+            addLeavingMemberDetails(leavingMember);
+        })
+
+        socket.on('message', function(data) {
+            addChatMessage(data);
+        })
+    </script>
+
+    <!-- Scripts for button clicks -->
+    <script type="text/javascript">
+
+        // Called when logout button is clicked
+        function logout() {
+            window.location = "/logout"
+        }
+
+        // Called when send message is clicked
+        function sendMessage(msg) {
+            if (msg == "") {
+                return;
+            } else {
+                // Clear message input box
+                $('#messageInputTextBox')[0].value = "";
+
+                data = {};
+                data.username = '{{username}}';
+                data.message = msg;
+                addChatMessage(data);
+
+                socket.emit('message', {
+                    message: msg,
+                    room: '{{roomID}}'
+                    }
+                );
+            }
+        }
+
+        function addChatMessage(data) {
+            var mainDiv = document.createElement('div');
+            var mainPara = document.createElement('p');
+
+            var strongTag = document.createElement('strong');
+            strongTag.innerHTML = data.username + " : ";
+
+            var textNode = document.createTextNode(data.message);
+            mainPara.appendChild(strongTag);
+            mainPara.appendChild(textNode);
+
+            mainDiv.appendChild(mainPara);
+            mainDiv.classList.add('message');
+            $('#allChatsContainer').append(mainDiv);
+        }
+
+        function addNewMemberDetails(newMember) {
+            var mainDiv = document.createElement('div');
+            mainDiv.innerHTML = newMember + " has joined the room";
+            mainDiv.classList.add('message', 'newMemberDetails');
+            $('#allChatsContainer').append(mainDiv);
+        }
+
+        function addLeavingMemberDetails(leavingMember) {
+            var mainDiv = document.createElement('div');
+            mainDiv.innerHTML = leavingMember + " has left the room";
+            mainDiv.classList.add('message', 'leavingMemberDetails');
+            $('#allChatsContainer').append(mainDiv);
+        }
+
     </script>
 </body>
 

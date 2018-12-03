@@ -69,22 +69,28 @@ body {
     margin: 0px;
 }
 
+#chatContainer > #allChatsContainer > .newMemberDetails {
+    color: #413a97;
+    font-size: 14px;
+}
+
+#chatContainer > #allChatsContainer > .leavingMemberDetails {
+    color: rgb(221, 90, 90);
+    font-size: 14px;
+}
+
 #chatContainer > #sendMessageContainer {
     height: 10%;
     padding: 5px;
-}
-
-#chatContainer > #sendMessageContainer > #messageForm {
     text-align: center;
-    margin: 0px;
 }
 
-#chatContainer > #sendMessageContainer > #messageForm > #messageInputTextBox {
+#chatContainer > #sendMessageContainer > #messageInputTextBox {
     height: 100%;
     width: 75%;
 }
 
-#chatContainer > #sendMessageContainer > #messageForm > #messageInputSubmitButton {
+#chatContainer > #sendMessageContainer > #messageInputSubmitButton {
     height: 100%;
     width: 23%;
     padding: 0px;
