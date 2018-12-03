@@ -4,14 +4,15 @@ from flaskext.mysql import MySQL
 from pymysql.err import IntegrityError
 
 app = Flask(__name__)
-socketIO = SocketIO(app)
 
 app.config['SECRET_KEY'] = 'thiscanbeanythinglol'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'idk'
 app.config['MYSQL_DATABASE_DB'] = 'youtube_sync'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
 mysql = MySQL(app)
+socketIO = SocketIO(app)
 
 @app.route('/')
 def homePage():
@@ -115,3 +116,37 @@ def watchPage(roomID):
     data = cursor.fetchone()
     videoID = data[0]
     return render_template('watch.html', videoID = videoID, roomID = roomID)
+
+@socketIO.on('connect')
+def connection():
+    print("Received connection : {}".format(request.sid))
+
+@socketIO.on('join')
+def joinRoom(data):
+    print('Received for join : '+ str(data))
+    room = data['room']
+    join_room(room)
+    socketIO.emit('memberChange', '{} just entered the room'.format(session['username']), room=room)
+
+@socketIO.on('leave')
+def leaveRoom(data):
+    print('Received for leave : '+ str(data))
+    room = data['room']
+    leave_room(room)
+    socketIO.emit('memberChange', '{} just left the room from leaveRoom'.format(session['username']), room = room)
+
+# Still to implementing closing of rooms
+# Should also remove entry from database when a room is closed
+def closeRoom(room):
+    close_room(room)
+
+@socketIO.on('disconnect')
+def test_disconnect():
+    for room in rooms(request.sid):
+        leave_room(room, sid=request.sid)
+        socketIO.emit('memberChange', '{} just left the room'.format(session['username']), room = room)
+    print('Client Disconnected : ', request.sid)
+
+# This seems to be pointless, it works without this anyways
+# if __name__ == '__main__':
+#     socketIO.run(app)
