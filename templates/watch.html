@@ -128,7 +128,8 @@
 
         // Called when logout button is clicked
         function logout() {
-            window.location = "/logout"
+            socket.emit('leaveAllRooms');
+            window.location = "/logout";
         }
 
         // Called when send message is clicked

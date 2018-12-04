@@ -157,11 +157,16 @@ def closeRoom(room):
 
 @socketIO.on('disconnect')
 def test_disconnect():
+    forceClientLeaveAllRooms()
+    print('Client Disconnected : ', request.sid)
+
+@socketIO.on('leaveAllRooms')
+def forceClientLeaveAllRooms():
     for room in rooms(request.sid):
+        print('{} leaving room {}'.format(request.sid, room))
         leave_room(room, sid=request.sid)
         leavingUser = session['username']
         socketIO.emit('memberLeave', leavingUser, room = room)
-    print('Client Disconnected : ', request.sid)
 
 # This seems to be pointless, it works without this anyways
 # if __name__ == '__main__':
