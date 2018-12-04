@@ -7,6 +7,7 @@
     <title>Welcome to Youtube Sync</title>
     <!-- Bootstrap Requirements -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='base.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -16,8 +17,8 @@
             <h1 id="mainHeading">Welcome to Youtube Sync</h1>
             <img id="youtubeImage" src="/static/youtubeLogo.png" />
             <div id="enterUsernameDiv">
-                <input id="usernameInputTextBox" type="text" placeholder="Enter a Username"> <br />
-                <button type="button" class="btn btn-primary btn-lg" onclick="createSession($('#usernameInputTextBox')[0].value)">Proceed</button>
+                <input id="usernameInputTextBox" type="text" placeholder="Enter a Username" autofocus="autofocus"> <br />
+                <button id="proceedButton" type="button" class="btn btn-primary btn-lg" onclick="createSession($('#usernameInputTextBox')[0].value)">Proceed</button>
             </div>
             <div id="chooseOptionDiv">
                 <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newRoomModal">Create New Room</button>
@@ -41,7 +42,7 @@
                     <input id="NSvideoIDInputTextBox" class="roomInput" type="text" name="message" placeholder="Video ID">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="createRoom($('#NSvideoIDInputTextBox')[0].value)">Create Room</button>
+                    <button id="createRoomButton" type="button" class="btn btn-primary" onclick="createRoom($('#NSvideoIDInputTextBox')[0].value)">Create Room</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -62,12 +63,17 @@
                     <input id="JSroomIDInputTextBox" class="roomInput" type="text" name="message" placeholder="Room ID">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="joinRoom($('#JSroomIDInputTextBox')[0].value)">Join Room</button>
+                    <button id="joinRoomButtom" type="button" class="btn btn-primary" onclick="joinRoom($('#JSroomIDInputTextBox')[0].value)">Join Room</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap Requirements -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
     <script>
         function createSession(username) {
@@ -139,10 +145,44 @@
             }
             myRequest.send();
         }
+
+        // Click proceed when hitting enter from the username text box
+        $('#usernameInputTextBox')[0].addEventListener("keyup", function(event) {
+            if (event.key != "Enter") {
+                return;
+            } else {
+                $('#proceedButton')[0].click();
+            }
+        });
+
+        // Click join room when hitting enter from the roomID text box
+        $('#JSroomIDInputTextBox')[0].addEventListener("keyup", function(event) {
+            if (event.key != "Enter") {
+                return;
+            } else {
+                $('#joinRoomButtom')[0].click();
+            }
+        });
+
+        // Click create room when hitting enter from the videoID text box
+        $('#NSvideoIDInputTextBox')[0].addEventListener("keyup", function(event) {
+            if (event.key != "Enter") {
+                return;
+            } else {
+                $('#createRoomButton')[0].click();
+            }
+        });
+
+        // Place cursor on roomID input box when clicking Join Room
+        $('#joinRoomModal').on('shown.bs.modal', function () {
+            $('#JSroomIDInputTextBox').focus();
+        })
+
+        // Place cursor on videoID input box when clicking Create Room
+        $('#newRoomModal').on('shown.bs.modal', function () {
+            $('#NSvideoIDInputTextBox').focus();
+        })
+
     </script>
-    <!-- Bootstrap Requirements -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@
     <!-- Bootstrap Requirements -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='base.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='watch.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -153,6 +154,7 @@
             }
         }
 
+        // Called when send button is clicked
         function addChatMessage(data) {
             var mainDiv = document.createElement('div');
             var mainPara = document.createElement('p');
@@ -169,6 +171,7 @@
             $('#allChatsContainer').append(mainDiv);
         }
 
+        // Called when backend sends new member details
         function addNewMemberDetails(newMember) {
             var mainDiv = document.createElement('div');
             mainDiv.innerHTML = newMember + " has joined the room";
@@ -176,12 +179,22 @@
             $('#allChatsContainer').append(mainDiv);
         }
 
+        // Called when backend sends leaving member details
         function addLeavingMemberDetails(leavingMember) {
             var mainDiv = document.createElement('div');
             mainDiv.innerHTML = leavingMember + " has left the room";
             mainDiv.classList.add('message', 'leavingMemberDetails');
             $('#allChatsContainer').append(mainDiv);
         }
+
+        // Click send when hitting enter from the text box
+        $('#messageInputTextBox')[0].addEventListener("keyup", function(event) {
+            if (event.key != "Enter") {
+                return;
+            } else {
+                $('#messageInputSubmitButton')[0].click();
+            }
+        });
 
     </script>
 </body>
