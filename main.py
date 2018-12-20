@@ -150,6 +150,18 @@ def receivedMessage(data):
         include_self = False
     )
 
+@socketIO.on('video_state_change')
+def updateVideoState(data):
+    print("Received message : {}".format(data))
+    state = data['state']
+    room = data['room']
+    socketIO.emit(
+        'video_state_change',
+        {'state': state},
+        room = room,
+        include_self = False
+    )
+
 # Still to implementing closing of rooms
 # Should also remove entry from database when a room is closed
 def closeRoom(room):
