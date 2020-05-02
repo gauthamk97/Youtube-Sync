@@ -66,7 +66,7 @@
 
         // Variable to detect if a video status update was caused by the user or by a message from server
         // This is used to prevent duplicate video_status_change messages from being sent.
-        var videoStatusToMoveTo = null;
+        var videoStatusChangeCausedByServer = false;
 
     </script>
 
@@ -127,23 +127,14 @@
 
         // The API calls this function when the player's state changes.
         function onPlayerStateChange(event) {
+            // Don't emit anything on the sockets if the change was not caused by a user
+            if (videoStatusChangeCausedByServer) {
+                videoStatusChangeCausedByServer = false;
+                return
+            }
 
             switch (event.data) {
                 case YT.PlayerState.PAUSED:
-
-                    // Just received a request to pause the video from another user.
-                    // So don't emit a pause message as it is a duplicate.
-                    if (videoStatusToMoveTo == "pause") {
-                        videoStatusToMoveTo = null;
-                        return;
-                    }
-
-                    // Just received a request, and still waiting for that request to take effect,
-                    // So don't emit a pause message until whatever the request was is completed.
-                    else if (videoStatusToMoveTo != null) {
-                        return;
-                    }
-
                     socket.emit('video_state_change', {
                         state: "pause",
                         room: '{{roomID}}'
@@ -152,20 +143,6 @@
                 break;
 
                 case YT.PlayerState.PLAYING:
-
-                    // Just received a request to play the video from another user.
-                    // So don't emit a play message as it is a duplicate.
-                    if (videoStatusToMoveTo == "play") {
-                        videoStatusToMoveTo = null;
-                        return;
-                    }
-
-                    // Just received a request, and still waiting for that request to take effect,
-                    // So don't emit a play message until whatever the request was is completed.
-                    else if (videoStatusToMoveTo != null) {
-                        return;
-                    }
-
                     socket.emit('video_state_change', {
                         state: "play",
                         room: '{{roomID}}'
@@ -173,17 +150,15 @@
                     );
                 break;
             }
-
         }
 
         function updateVideoState(data) {
+            videoStatusChangeCausedByServer = true;
             switch(data.state) {
                 case "pause":
-                    videoStatusToMoveTo = "pause";
                     player.pauseVideo();
                     break;
                 case "play":
-                    videoStatusToMoveTo = "play"
                     player.playVideo();
                     break;
             }
