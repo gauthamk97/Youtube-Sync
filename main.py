@@ -2,6 +2,9 @@ from flask import Flask, url_for, render_template, jsonify, make_response, reque
 from flask_socketio import SocketIO, join_room, leave_room, close_room, rooms
 from flaskext.mysql import MySQL
 from pymysql.err import IntegrityError
+import logging
+
+logging.basicConfig(filename="log/application.log", level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 app = Flask(__name__)
 
@@ -27,6 +30,7 @@ def login():
         ), 401)
     else:
         session['username'] = username
+        app.logger.info(f"{username} logged in")
         return make_response(jsonify(
             response="Session successfully created"
         ), 200)
@@ -35,6 +39,7 @@ def login():
 def logout():
     # Clear session if it exists
     session.pop('username', None)
+    app.logger.info(f"{username} logged out")
     if 'username' not in session:
         return redirect(url_for('homePage'))
 
@@ -119,28 +124,28 @@ def watchPage(roomID):
 
 @socketIO.on('connect')
 def connection():
-    print("Received connection : {}".format(request.sid))
+    app.logger.info(f"Received a connection : {request.sid}")
 
 @socketIO.on('join')
 def joinRoom(data):
-    print('Received for join : '+ str(data))
     room = data['room']
     newUser = session['username']
     join_room(room)
+    app.logger.info(f"{newUser} joined room {room}")
     socketIO.emit('memberAdd', newUser, room=room)
 
 @socketIO.on('leave')
 def leaveRoom(data):
-    print('Received for leave : '+ str(data))
     room = data['room']
     leavingUser = session['username']
     leave_room(room)
+    app.logger.info(f"{username} left room {room}")
     socketIO.emit('memberLeave', leavingUser, room = room)
 
 @socketIO.on('message')
 def receivedMessage(data):
-    print("Received message : {}".format(data))
     username = session['username']
+    app.logger.info(f"Received message : {data} from {username}")
     msg = data['message']
     room = data['room']
     socketIO.emit(
@@ -152,7 +157,8 @@ def receivedMessage(data):
 
 @socketIO.on('video_state_change')
 def updateVideoState(data):
-    print("Received message : {}".format(data))
+    username = session['username']
+    app.logger.info(f"Received message : {data} from {username}")
     state = data['state']
     room = data['room']
     socketIO.emit(
@@ -170,16 +176,12 @@ def closeRoom(room):
 @socketIO.on('disconnect')
 def test_disconnect():
     forceClientLeaveAllRooms()
-    print('Client Disconnected : ', request.sid)
+    app.logger.info(f"Client Disconnected : {request.sid}")
 
 @socketIO.on('leaveAllRooms')
 def forceClientLeaveAllRooms():
     for room in rooms(request.sid):
-        print('{} leaving room {}'.format(request.sid, room))
         leave_room(room, sid=request.sid)
         leavingUser = session['username']
+        app.logger.info(f"{leavingUser} left room {room}")
         socketIO.emit('memberLeave', leavingUser, room = room)
-
-# This seems to be pointless, it works without this anyways
-# if __name__ == '__main__':
-#     socketIO.run(app)
