@@ -129,7 +129,9 @@
         function onPlayerStateChange(event) {
             // Don't emit anything on the sockets if the change was not caused by a user
             if (videoStatusChangeCausedByServer) {
-                videoStatusChangeCausedByServer = false;
+                if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.PLAYING) {
+                    videoStatusChangeCausedByServer = false;
+                }
                 return
             }
 
@@ -137,7 +139,8 @@
                 case YT.PlayerState.PAUSED:
                     socket.emit('video_state_change', {
                         state: "pause",
-                        room: '{{roomID}}'
+                        room: '{{roomID}}',
+                        time: player.getCurrentTime()
                         }
                     );
                 break;
@@ -145,7 +148,8 @@
                 case YT.PlayerState.PLAYING:
                     socket.emit('video_state_change', {
                         state: "play",
-                        room: '{{roomID}}'
+                        room: '{{roomID}}',
+                        time: player.getCurrentTime()
                         }
                     );
                 break;
@@ -153,14 +157,29 @@
         }
 
         function updateVideoState(data) {
-            videoStatusChangeCausedByServer = true;
+            // Videos are out of sync, resync them
+            syncVideoTime(data)
+            
+            // Sync video playback status
+            syncVideoPlaybackState(data)
+        }
+
+        function syncVideoTime(data) {
+            videoStatusChangeCausedByServer = true
+            if (Math.abs(data.time - player.getCurrentTime()) > 5) {
+                player.seekTo(data.time)
+            }
+        }
+
+        function syncVideoPlaybackState(data) {
+            videoStatusChangeCausedByServer = true
             switch(data.state) {
                 case "pause":
-                    player.pauseVideo();
-                    break;
+                    player.pauseVideo()
+                    break
                 case "play":
-                    player.playVideo();
-                    break;
+                    player.playVideo()
+                    break
             }
         }
     </script>

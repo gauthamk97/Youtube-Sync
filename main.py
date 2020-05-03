@@ -37,9 +37,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+    app.logger.info(f"{session['username']} logged out")
     # Clear session if it exists
     session.pop('username', None)
-    app.logger.info(f"{username} logged out")
     if 'username' not in session:
         return redirect(url_for('homePage'))
 
@@ -139,13 +139,13 @@ def leaveRoom(data):
     room = data['room']
     leavingUser = session['username']
     leave_room(room)
-    app.logger.info(f"{username} left room {room}")
+    app.logger.info(f"{leavingUser} left room {room}")
     socketIO.emit('memberLeave', leavingUser, room = room)
 
 @socketIO.on('message')
 def receivedMessage(data):
     username = session['username']
-    app.logger.info(f"Received message : {data} from {username}")
+    app.logger.info(f"Received chat message : {data} from {username}")
     msg = data['message']
     room = data['room']
     socketIO.emit(
@@ -158,12 +158,11 @@ def receivedMessage(data):
 @socketIO.on('video_state_change')
 def updateVideoState(data):
     username = session['username']
-    app.logger.info(f"Received message : {data} from {username}")
-    state = data['state']
+    app.logger.info(f"Received video_state_change message : {data} from {username}")
     room = data['room']
     socketIO.emit(
         'video_state_change',
-        {'state': state},
+        data,
         room = room,
         include_self = False
     )
